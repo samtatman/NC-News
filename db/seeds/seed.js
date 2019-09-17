@@ -20,7 +20,7 @@ exports.seed = function(knex) {
     .then(() => {
       const formattedArticles = formatDates(articlesData);
       return knex("articles")
-        .insert(articlesData)
+        .insert(formattedArticles)
         .returning("*");
       /* 
       
@@ -47,7 +47,6 @@ exports.seed = function(knex) {
         .insert(formattedComments)
         .returning("*");
     })
-    .then(comments => {
-      console.log(comments, "comments");
-    });
+    .then(comments => {})
+    .catch(err => console.log(err));
 };
