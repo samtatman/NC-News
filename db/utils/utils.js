@@ -24,3 +24,9 @@ exports.formatComments = (comments, articleRef) => {
     return newComment;
   });
 };
+
+exports.errorIfIdNotExist = array => {
+  if (array.length === 0) {
+    return Promise.reject({ status: 404, msg: "Id does not exist." });
+  } else return array;
+};

@@ -3,7 +3,8 @@ const { expect } = require("chai");
 const {
   formatDates,
   makeRefObj,
-  formatComments
+  formatComments,
+  errorIfIdNotExist
 } = require("../db/utils/utils");
 
 describe("formatDates", () => {
@@ -43,9 +44,11 @@ describe("formatDates", () => {
   it("returns an empty array when passed an empty array", () => {
     expect(formatDates([])).to.eql([]);
   });
-  it("original array is not mutated", () => {
-    let arr = [];
-    expect(formatDates(arr)).to.not.equal(arr);
+  it("original array and objects inside are not mutated", () => {
+    let arr = [sample[0]];
+    const newArr = arr;
+    formatDates(arr);
+    expect(newArr[0]).to.equal(arr[0]);
   });
   it("returns a formatted array when passed a non-formatted array", () => {
     expect(formatDates([sample[0]])).to.eql([
@@ -126,11 +129,11 @@ describe("makeRefObj", () => {
   it("returns an empty object when passed an empty array", () => {
     expect(makeRefObj([])).to.eql({});
   });
-  it("does not mutate original array", () => {
-    let arr = [];
+  it("does not mutate original array or objects", () => {
+    let arr = [sample[0]];
     const newArr = arr;
     makeRefObj(arr);
-    expect(arr).to.equal(newArr);
+    expect(arr[0]).to.equal(newArr[0]);
   });
   it("when passed on object in array, returns object of value pair", () => {
     expect(makeRefObj([sample[0]], "title", "article_id")).to.eql({
@@ -192,8 +195,10 @@ describe("formatComments", () => {
     expect(formatComments([])).to.eql([]);
   });
   it("original array is not mutated", () => {
-    let arr = [];
-    expect(formatDates(arr)).to.not.equal(arr);
+    let arr = [sample[0]];
+    newArr = arr;
+    formatDates(arr);
+    expect(newArr[0]).to.equal(arr[0]);
   });
   it("returns an array with one formatted object when passed an array of one non-formatted object: replaces belongs_to with article_id, renames created_by to author and changes UNIX timestamp to JS Date Object", () => {
     expect(formatComments([sample[0]], sampleRef)).to.eql([
@@ -233,5 +238,16 @@ describe("formatComments", () => {
         created_at: sampleTime3
       }
     ]);
+  });
+});
+
+describe("errorIfIdNotExist", () => {
+  it('returns rejected promise when passed array of length 0 with object containg status 404 and msg: "id does not exist"', () => {
+    return errorIfIdNotExist([]).catch(output => {
+      expect(output).to.eql({ status: 404, msg: "Id does not exist." });
+    });
+  });
+  it("returns array when passed array of length 1 or more", () => {
+    expect(errorIfIdNotExist([1, 2, 3])).to.eql([1, 2, 3]);
   });
 });
