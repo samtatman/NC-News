@@ -4,7 +4,8 @@ const {
   formatDates,
   makeRefObj,
   formatComments,
-  errorIfIdNotExist
+  errorIfInputNotExist,
+  invalidMethod
 } = require("../db/utils/utils");
 
 describe("formatDates", () => {
@@ -241,13 +242,16 @@ describe("formatComments", () => {
   });
 });
 
-describe("errorIfIdNotExist", () => {
+describe("errorIfInputNotExist", () => {
   it('returns rejected promise when passed array of length 0 with object containg status 404 and msg: "id does not exist"', () => {
-    return errorIfIdNotExist([]).catch(output => {
-      expect(output).to.eql({ status: 404, msg: "Id does not exist." });
+    return errorIfInputNotExist([]).catch(output => {
+      expect(output).to.eql({
+        status: 404,
+        msg: "Input does not exist in database"
+      });
     });
   });
   it("returns array when passed array of length 1 or more", () => {
-    expect(errorIfIdNotExist([1, 2, 3])).to.eql([1, 2, 3]);
+    expect(errorIfInputNotExist([1, 2, 3])).to.eql([1, 2, 3]);
   });
 });

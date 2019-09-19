@@ -1,6 +1,6 @@
 exports.handleCustomErrors = (err, req, res, next) => {
   if (("status", "msg" in err)) {
-    res.status(err.status).send({ msg: err.msg });
+    return res.status(err.status).send({ msg: err.msg });
   } else next(err);
 };
 
@@ -12,13 +12,13 @@ exports.handleSQLErrors = (err, req, res, next) => {
   };
   if (err.code) {
     if (err.detail) {
-      res.status(400).send({ msg: err.detail });
+      return res.status(400).send({ msg: err.detail });
     }
-    res.status(400).send({ msg: ref[err.code] });
+    return res.status(400).send({ msg: ref[err.code] });
   } else next(err);
 };
 
 exports.handleUnhandledErrors = (err, req, res, next) => {
   console.log(oof);
-  res.status(500).send({ msg: "oof" });
+  return res.status(500).send({ msg: "Unhandled Error" });
 };

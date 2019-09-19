@@ -1,9 +1,12 @@
 process.env.NODE_ENV = "test";
 
-const { expect } = require("chai");
+const chai = require("chai");
+const chaiSorted = require("chai-sorted");
+const { expect } = chai;
 const request = require("supertest");
 const app = require("../app");
 const connection = require("../db/connection");
+chai.use(chaiSorted);
 
 describe("/api", () => {
   beforeEach(() => {
@@ -25,6 +28,13 @@ describe("/api", () => {
   });
 
   describe("/api/topics", () => {
+    it("400: return invalid method when invalid method called", () => {
+      return request(app)
+        .patch("/api/topics")
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Invalid method");
+        });
+    });
     describe("GET", () => {
       it("200: returns all topics ", () => {
         return request(app)
@@ -50,6 +60,13 @@ describe("/api", () => {
     });
   });
   describe("/api/users", () => {
+    it("400: return invalid method when invalid method called", () => {
+      return request(app)
+        .delete("/api/users/1")
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Invalid method");
+        });
+    });
     describe("GET: returns single user using :username", () => {
       it("200: returns single user", () => {
         return request(app)
@@ -77,6 +94,13 @@ describe("/api", () => {
     });
   });
   describe("/api/articles", () => {
+    it("400: return invalid method when invalid method called", () => {
+      return request(app)
+        .delete("/api/articles")
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Invalid method");
+        });
+    });
     describe("GET: returns all articles", () => {
       it("200: returns all articles", () => {
         return request(app)
@@ -84,14 +108,14 @@ describe("/api", () => {
           .expect(200)
           .then(({ body }) => {
             expect(body.articles[0]).to.contain({
-              article_id: 12,
-              title: "Moustache",
+              article_id: 1,
+              title: "Living in the shadow of a great man",
               author: "butter_bridge",
-              body: "Have you seen the size of that thing?",
+              body: "I find this existence challenging",
               topic: "mitch",
-              created_at: "1974-11-26T12:21:54.171Z",
-              votes: 0,
-              comment_count: "0"
+              created_at: "2018-11-15T12:21:54.171Z",
+              votes: 100,
+              comment_count: "13"
             });
             expect(body.articles.length).to.equal(12);
           });
@@ -101,32 +125,108 @@ describe("/api", () => {
           .get("/api/articles")
           .expect(200)
           .then(({ body }) => {
-            console.log(body.articles);
-            expect(body.articles[3]).to.contain({
-              comment_count: "2"
+            expect(body.articles[0]).to.contain({
+              comment_count: "13"
             });
             expect(body.articles.length).to.equal(12);
           });
       });
+      it("200: articles are sorted by created_at by default, in descending order", () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).to.be.descendingBy("created_at");
+            expect(body.articles.length).to.equal(12);
+          });
+      });
+      it("200: articles can be sorted by article_id", () => {
+        return request(app)
+          .get("/api/articles?sort_by=article_id")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).to.be.descendingBy("article_id");
+            expect(body.articles.length).to.equal(12);
+          });
+      });
+      it("200: articles can be ordered by ascending", () => {
+        return request(app)
+          .get("/api/articles?order_by=asc")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).to.be.ascendingBy("created_at");
+            expect(body.articles.length).to.equal(12);
+          });
+      });
+      it("200: articles can be filtered by author", () => {
+        return request(app)
+          .get("/api/articles?author=butter_bridge")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles[0]).to.contain({
+              author: "butter_bridge"
+            });
+            expect(body.articles.length).to.equal(3);
+          });
+      });
+      it("200: articles can be filtered by topic", () => {
+        return request(app)
+          .get("/api/articles?topic=mitch")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles[0]).to.contain({
+              topic: "mitch"
+            });
+            expect(body.articles.length).to.equal(11);
+          });
+      });
+      it("404: if queried with author that does not exist, returns 'Input does not exist in database'", () => {
+        return request(app)
+          .get("/api/articles?author=does-not-exist")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Input does not exist in database");
+          });
+      });
+      it("404: returns 'Input does not exist in database' when passed topic that doesn't exist", () => {
+        return request(app)
+          .get("/api/articles?topic=5r47r")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Input does not exist in database");
+          });
+      });
+      it("400: returns 'Column does not exist' when passed sort_by that doesn't exist", () => {
+        return request(app)
+          .get("/api/articles?sort_by=5r47r")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Column does not exist");
+          });
+      });
     });
     describe("GET: returns single article using :article_id", () => {
+      it("400: return invalid method when invalid method called", () => {
+        return request(app)
+          .delete("/api/articles/1")
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Invalid method");
+          });
+      });
       it("200: returns single article", () => {
         return request(app)
           .get("/api/articles/1")
           .expect(200)
           .then(({ body }) => {
-            delete body.article[0].created_at;
-            expect(body.article).to.eql([
-              {
-                article_id: 1,
-                title: "Living in the shadow of a great man",
-                topic: "mitch",
-                author: "butter_bridge",
-                body: "I find this existence challenging",
-                votes: 100,
-                commentCount: 13
-              }
-            ]);
+            expect(body.article[0]).to.contain({
+              article_id: 1,
+              title: "Living in the shadow of a great man",
+              topic: "mitch",
+              author: "butter_bridge",
+              body: "I find this existence challenging",
+              votes: 100,
+              commentCount: 13
+            });
           });
       });
       it("400: returns error 'Invalid input syntax' when passed invalid article_id", () => {
@@ -142,7 +242,7 @@ describe("/api", () => {
           .get("/api/articles/76865")
           .expect(404)
           .then(({ body }) => {
-            expect(body.msg).to.equal("Id does not exist.");
+            expect(body.msg).to.equal("Input does not exist in database");
           });
       });
     });
@@ -172,17 +272,9 @@ describe("/api", () => {
           .send({ inc_votes: -20 })
           .expect(200)
           .then(({ body }) => {
-            delete body.article[0].created_at;
-            expect(body.article).to.eql([
-              {
-                article_id: 1,
-                title: "Living in the shadow of a great man",
-                topic: "mitch",
-                author: "butter_bridge",
-                body: "I find this existence challenging",
-                votes: 80
-              }
-            ]);
+            expect(body.article[0]).to.contain({
+              votes: 80
+            });
           });
       });
       it("400: when passed invalid vote count returns 'Invalid input syntax.'", () => {
@@ -209,7 +301,25 @@ describe("/api", () => {
           .send({ inc_votes: 4 })
           .expect(404)
           .then(({ body }) => {
-            expect(body.msg).to.equal("Id does not exist.");
+            expect(body.msg).to.equal("Input does not exist in database");
+          });
+      });
+      it("400: when passed invalid inc_count, returns invalid syntax", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({ inc_votes: "dog" })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Invalid input syntax");
+          });
+      });
+      it("400: when passed misspelt inc_count, returns unchanged comment", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({ ind_votes: 23 })
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.article[0]).to.contain({ votes: 100 });
           });
       });
     });
@@ -223,9 +333,7 @@ describe("/api", () => {
             username: "butter_bridge"
           })
           .then(({ body }) => {
-            expect(body.comment).to.contain.keys("created_at");
-            delete body.comment.created_at;
-            expect(body.comment).to.eql({
+            expect(body.comment).to.contain({
               article_id: 1,
               comment_id: 19,
               body: "test comment",
@@ -234,7 +342,7 @@ describe("/api", () => {
             });
           });
       });
-      it("400: when inserted comment has invalid keys, returns 'invalid keys", () => {
+      it("400: when inserted comment has invalid keys, returns 'Column does not exist'", () => {
         return request(app)
           .post("/api/articles/1/comments")
           .expect(400)
@@ -246,37 +354,41 @@ describe("/api", () => {
             expect(body.msg).to.equal("Column does not exist");
           });
       });
-      it("400: when inserted comment has invalid values, returns 'invalid keys", () => {
+      it("400: when inserted comment has invalid values, returns custom error message", () => {
         return request(app)
           .post("/api/articles/1/comments")
           .expect(400)
           .send({
             body: 56,
-            username: true
+            username: 897
           })
           .then(({ body }) => {
             expect(body.msg).to.equal(
-              'Key (author)=(true) is not present in table "users".'
+              'Key (author)=(897) is not present in table "users".'
+            );
+          });
+      });
+      it("404: returns custom error when passed valid input that does not exist", () => {
+        return request(app)
+          .post("/api/articles/898/comments")
+          .expect(400)
+          .send({
+            body: "hello",
+            username: "butter_bridge"
+          })
+          .then(({ body }) => {
+            expect(body.msg).to.equal(
+              'Key (article_id)=(898) is not present in table "articles".'
             );
           });
       });
     });
     describe("GET: /article_id/comments returns array of comments using article_id", () => {
-      it("200: returns array of comments from single article", () => {
+      it("400: return invalid method when invalid method called", () => {
         return request(app)
-          .get("/api/articles/1/comments")
-          .expect(200)
+          .delete("/api/articles/1/comments")
           .then(({ body }) => {
-            expect(body.comments.length).to.equal(13);
-            delete body.comments[0].created_at;
-            expect(body.comments[0]).to.eql({
-              article_id: 1,
-              comment_id: 2,
-              body:
-                "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
-              author: "butter_bridge",
-              votes: 14
-            });
+            expect(body.msg).to.equal("Invalid method");
           });
       });
       it("200: returns array of comments from single article", () => {
@@ -296,30 +408,37 @@ describe("/api", () => {
             });
           });
       });
-      it("200: sorts by ascending comment_id by default", () => {
+      it("200: returns array of comments from single article", () => {
         return request(app)
           .get("/api/articles/1/comments")
           .expect(200)
           .then(({ body }) => {
-            expect(body.comments[0]).to.contain({
-              comment_id: 2
-            });
-            expect(body.comments[1]).to.contain({
-              comment_id: 3
+            expect(body.comments.length).to.equal(13);
+            delete body.comments[0].created_at;
+            expect(body.comments[0]).to.eql({
+              article_id: 1,
+              comment_id: 2,
+              body:
+                "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+              author: "butter_bridge",
+              votes: 14
             });
           });
       });
-      it("200: can be ordered in descending order", () => {
+      it("200: sorts by descending created_at by default", () => {
         return request(app)
-          .get("/api/articles/1/comments?order_by=desc")
+          .get("/api/articles/1/comments")
           .expect(200)
           .then(({ body }) => {
-            expect(body.comments[0]).to.contain({
-              comment_id: 18
-            });
-            expect(body.comments[1]).to.contain({
-              comment_id: 13
-            });
+            expect(body.comments).to.be.descendingBy("created_at");
+          });
+      });
+      it("200: can be ordered in ascending order", () => {
+        return request(app)
+          .get("/api/articles/1/comments?order_by=asc")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.comments).to.be.ascendingBy("created_at");
           });
       });
       it("200: can sorted by author if requested", () => {
@@ -327,12 +446,7 @@ describe("/api", () => {
           .get("/api/articles/1/comments?sort_by=author&order_by=desc")
           .expect(200)
           .then(({ body }) => {
-            expect(body.comments[0]).to.contain({
-              author: "icellusedkars"
-            });
-            expect(body.comments[1]).to.contain({
-              author: "icellusedkars"
-            });
+            expect(body.comments).to.be.descendingBy("author");
           });
       });
       it("400: returns 'Invalid input syntax' when passed invalid id ", () => {
@@ -351,12 +465,12 @@ describe("/api", () => {
             expect(body.msg).to.equal("Column does not exist");
           });
       });
-      xit("400: returns 'Invalid input syntax' when passed invalid order ", () => {
+      it("200: when passed invalid order, orders by default ", () => {
         return request(app)
-          .get("/api/articles/1/comments?order_by='retff")
+          .get("/api/articles/1/comments?order_by=6")
           .expect(200)
           .then(({ body }) => {
-            expect(body.msg).to.equal("Invalid input syntax");
+            expect(body.comments).to.be.descendingBy("created_at");
           });
       });
       it("404: returns 'Id does not exist.' when passed valid id that does not exist", () => {
@@ -364,7 +478,92 @@ describe("/api", () => {
           .get("/api/articles/67685/comments")
           .expect(404)
           .then(({ body }) => {
-            expect(body.msg).to.equal("Id does not exist.");
+            expect(body.msg).to.equal("Input does not exist in database");
+          });
+      });
+    });
+  });
+  describe("/api/comments/:comment_id", () => {
+    it("400: return invalid method when invalid method called", () => {
+      return request(app)
+        .get("/api/comments/1")
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Invalid method");
+        });
+    });
+    describe("PATCH: updates comment using comment_id", () => {
+      it("200: updates votes on comment using comment_id and inc_votes", () => {
+        return request(app)
+          .patch("/api/comments/1")
+          .send({ inc_votes: 10 })
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.comment[0]).to.contain({
+              votes: 26,
+              comment_id: 1
+            });
+          });
+      });
+      it("400: returns invalid input syntax when passed invalid comment_id", () => {
+        return request(app)
+          .patch("/api/comments/invalid")
+          .send({ inc_votes: 10 })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Invalid input syntax");
+          });
+      });
+      it("404: returns 'Input does not exist in database' when passed valid comment_id that does not exist", () => {
+        return request(app)
+          .patch("/api/comments/9090")
+          .send({ inc_votes: 10 })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Input does not exist in database");
+          });
+      });
+      it("400: returns 'Invalid input syntax' when passed invalid inc_votes", () => {
+        return request(app)
+          .patch("/api/comments/2")
+          .send({ inc_votes: "thr" })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Invalid input syntax");
+          });
+      });
+      it("200: returns unchanged comment when passed missplet inc_votess", () => {
+        return request(app)
+          .patch("/api/comments/1")
+          .send({ inc_volts: 7 })
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.comment[0]).to.contain({
+              votes: 16,
+              comment_id: 1
+            });
+          });
+      });
+    });
+    describe("DELETE: deletes comment using comment_id", () => {
+      it("204: deletes comment", () => {
+        return request(app)
+          .delete("/api/comments/1")
+          .expect(204);
+      });
+      it("404: returns 'Input does not exist' when passed valid input that does not exist", () => {
+        return request(app)
+          .delete("/api/comments/686")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Input does not exist");
+          });
+      });
+      it("400: returns 'Invalid input syntax' when passed invalid input", () => {
+        return request(app)
+          .delete("/api/comments/invalid")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Invalid input syntax");
           });
       });
     });

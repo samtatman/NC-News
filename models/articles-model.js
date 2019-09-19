@@ -1,11 +1,11 @@
 const connection = require("../db/connection");
-const { errorIfIdNotExist } = require("../db/utils/utils");
+const { errorIfInputNotExist } = require("../db/utils/utils");
 exports.fetchArticleById = article_id => {
   return connection
     .select("*")
     .from("articles")
     .where({ article_id })
-    .then(article => errorIfIdNotExist(article))
+    .then(article => errorIfInputNotExist(article))
     .then(([article]) => {
       const commentPromise = connection
         .select("*")
@@ -26,7 +26,7 @@ exports.updateArticleById = (article_id, inc_value) => {
     .from("articles")
     .where({ article_id })
     .returning("*")
-    .then(article => errorIfIdNotExist(article));
+    .then(article => errorIfInputNotExist(article));
 };
 
 exports.insertCommentByArticleId = (article_id, comment) => {
@@ -41,23 +41,37 @@ exports.insertCommentByArticleId = (article_id, comment) => {
 
 exports.fetchCommentsByArticleId = (
   article_id,
-  sort_by = "comment_id",
-  order_by = "asc"
+  sort_by = "created_at",
+  order_by = "desc"
 ) => {
   return connection
     .select("*")
     .from("comments")
     .where({ article_id })
     .orderBy(sort_by, order_by)
-    .then(comments => errorIfIdNotExist(comments));
+    .then(comments => errorIfInputNotExist(comments));
 };
 
-exports.fetchArticles = (sort_by = "created_at") => {
+exports.fetchArticles = (
+  sort_by = "created_at",
+  order_by = "desc",
+  author,
+  topic
+) => {
   return connection
     .select("articles.*")
     .count({ comment_count: "comment_id" })
     .from("articles")
     .leftJoin("comments", "articles.article_id", "comments.article_id")
     .groupBy("articles.article_id")
-    .orderBy(sort_by);
+    .orderBy(sort_by, order_by)
+    .modify(currentQuery => {
+      if (author) {
+        currentQuery.where({ "articles.author": author });
+      }
+      if (topic) {
+        currentQuery.where({ "articles.topic": topic });
+      }
+    })
+    .then(articles => errorIfInputNotExist(articles));
 };
