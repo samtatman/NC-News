@@ -74,6 +74,13 @@ exports.fetchArticles = (
       }
     })
     .then(articles => {
+      if (!articles.length && topic && author) {
+        return Promise.all([
+          articles,
+          checkIfThingExists(topic, "slug", "topics"),
+          checkIfThingExists(author, "username", "users")
+        ]);
+      }
       if (!articles.length && topic) {
         return Promise.all([
           articles,

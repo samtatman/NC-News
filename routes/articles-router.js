@@ -6,23 +6,23 @@ const {
   getArticles
 } = require("../controllers/articles-controller");
 
-const { invalidMethod } = require("../error-handlers");
+const { handleInvalidMethod } = require("../error-handlers");
 
 const articlesRouter = require("express").Router();
 articlesRouter
   .route("/")
   .get(getArticles)
-  .all(invalidMethod);
+  .all(handleInvalidMethod);
 articlesRouter
   .route("/:article_id")
   .get(getArticleById)
   .patch(patchArticleById)
-  .all(invalidMethod);
+  .all(handleInvalidMethod);
 
 articlesRouter
   .route("/:article_id/comments")
   .post(postCommentByArticleId)
   .get(getCommentsByArticleId)
-  .all(invalidMethod);
+  .all(handleInvalidMethod);
 
 module.exports = articlesRouter;

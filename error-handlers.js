@@ -32,6 +32,7 @@ exports.errorIfInputNotExist = array => {
   } else return array;
 };
 
-exports.invalidMethod = (req, res, next) => {
-  res.status(400).send({ msg: "Invalid method" });
+exports.handleInvalidMethod = (req, res, next) => {
+  console.log("jefefw");
+  res.status(405).send({ msg: "Invalid method" });
 };

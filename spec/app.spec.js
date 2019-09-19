@@ -28,9 +28,10 @@ describe("/api", () => {
   });
 
   describe("/api/topics", () => {
-    it("400: return invalid method when invalid method called", () => {
+    it("405: return invalid method when invalid method called", () => {
       return request(app)
         .patch("/api/topics")
+        .expect(405)
         .then(({ body }) => {
           expect(body.msg).to.equal("Invalid method");
         });
@@ -60,9 +61,10 @@ describe("/api", () => {
     });
   });
   describe("/api/users", () => {
-    it("400: return invalid method when invalid method called", () => {
+    it("405: return invalid method when invalid method called", () => {
       return request(app)
         .delete("/api/users/1")
+        .expect(405)
         .then(({ body }) => {
           expect(body.msg).to.equal("Invalid method");
         });
@@ -94,9 +96,10 @@ describe("/api", () => {
     });
   });
   describe("/api/articles", () => {
-    it("400: return invalid method when invalid method called", () => {
+    it("405: return invalid method when invalid method called", () => {
       return request(app)
         .delete("/api/articles")
+        .expect(405)
         .then(({ body }) => {
           expect(body.msg).to.equal("Invalid method");
         });
@@ -225,6 +228,14 @@ describe("/api", () => {
             expect(body.articles).to.eql([]);
           });
       });
+      xit("400: ", () => {
+        return request(app)
+          .get("/api/articles?author=lurker")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).to.eql([]);
+          });
+      });
       it("400: returns 'Column does not exist' when passed sort_by that doesn't exist", () => {
         return request(app)
           .get("/api/articles?sort_by=5r47r")
@@ -235,9 +246,10 @@ describe("/api", () => {
       });
     });
     describe("GET: returns single article using :article_id", () => {
-      it("400: return invalid method when invalid method called", () => {
+      it("405: return invalid method when invalid method called", () => {
         return request(app)
           .delete("/api/articles/1")
+          .expect(405)
           .then(({ body }) => {
             expect(body.msg).to.equal("Invalid method");
           });
@@ -424,9 +436,10 @@ describe("/api", () => {
       });
     });
     describe("GET: /article_id/comments returns array of comments using article_id", () => {
-      it("400: return invalid method when invalid method called", () => {
+      it("405: return invalid method when invalid method called", () => {
         return request(app)
           .delete("/api/articles/1/comments")
+          .expect(405)
           .then(({ body }) => {
             expect(body.msg).to.equal("Invalid method");
           });
@@ -524,9 +537,10 @@ describe("/api", () => {
     });
   });
   describe("/api/comments/:comment_id", () => {
-    it("400: return invalid method when invalid method called", () => {
+    it("405: return invalid method when invalid method called", () => {
       return request(app)
         .get("/api/comments/1")
+        .expect(405)
         .then(({ body }) => {
           expect(body.msg).to.equal("Invalid method");
         });
