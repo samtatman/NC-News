@@ -1,4 +1,5 @@
 const connection = require("../db/connection");
+const { errorIfInputNotExist } = require("../error-handlers");
 exports.fetchUserByUsername = username => {
   return connection
     .select("*")

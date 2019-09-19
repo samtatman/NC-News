@@ -3,7 +3,9 @@ const {
   updateArticleById,
   insertCommentByArticleId,
   fetchCommentsByArticleId,
-  fetchArticles
+  fetchArticles,
+  checkIfTopicExists,
+  checkIfUsernameExists
 } = require("../models/articles-model");
 
 exports.getArticleById = (req, res, next) => {

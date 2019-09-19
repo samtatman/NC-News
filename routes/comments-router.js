@@ -3,7 +3,7 @@ const {
   patchComment,
   deleteComment
 } = require("../controllers/comments-controller");
-const { invalidMethod } = require("../db/utils/utils");
+const { invalidMethod } = require("../error-handlers");
 
 commentsRouter
   .route("/:comment_id")

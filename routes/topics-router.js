@@ -1,6 +1,6 @@
 const topicsRouter = require("express").Router();
 const { getTopics } = require("../controllers/topics-controller.js");
-const { invalidMethod } = require("../db/utils/utils");
+const { invalidMethod } = require("../error-handlers");
 topicsRouter
   .route("/")
   .get(getTopics)

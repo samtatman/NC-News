@@ -1,5 +1,5 @@
 const connection = require("../db/connection");
-const { errorIfInputNotExist } = require("../db/utils/utils");
+const { errorIfInputNotExist } = require("../error-handlers.js");
 exports.fetchArticleById = article_id => {
   return connection
     .select("*")
@@ -58,7 +58,7 @@ exports.fetchArticles = (
   author,
   topic
 ) => {
-  return connection
+  const fetchPromise = connection
     .select("articles.*")
     .count({ comment_count: "comment_id" })
     .from("articles")
@@ -72,6 +72,30 @@ exports.fetchArticles = (
       if (topic) {
         currentQuery.where({ "articles.topic": topic });
       }
-    })
-    .then(articles => errorIfInputNotExist(articles));
+    });
+};
+
+exports.checkIfUsernameExists = username => {
+  if (username) {
+    return connection
+      .select("*")
+      .from("users")
+      .where("username")
+      .then(output => {
+        if (!output.length)
+          Promise.reject({ status: 404, err: "Username does not exist." });
+      });
+  } else return username;
+};
+exports.checkIfTopicExists = topic => {
+  if (topic) {
+    return connection
+      .select("*")
+      .from("topics")
+      .where("topic")
+      .then(output => {
+        if (!output.length)
+          Promise.reject({ status: 404, err: "Topic does not exist." });
+      });
+  } else return topic;
 };

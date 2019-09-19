@@ -196,6 +196,14 @@ describe("/api", () => {
             expect(body.msg).to.equal("Input does not exist in database");
           });
       });
+      it("200: when passed a topic that does exist, but has no associated articles, returns empty array", () => {
+        return request(app)
+          .get("/api/articles?topic=paper")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).to.eql([]);
+          });
+      });
       it("400: returns 'Column does not exist' when passed sort_by that doesn't exist", () => {
         return request(app)
           .get("/api/articles?sort_by=5r47r")
@@ -320,6 +328,17 @@ describe("/api", () => {
           .expect(200)
           .then(({ body }) => {
             expect(body.article[0]).to.contain({ votes: 100 });
+          });
+      });
+      it("400: when passed bigint, returns 'Invalid input syntax'", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({
+            inc_votes: 23758475748975943574759849875243825454957892475897239573472894
+          })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Invalid input syntax");
           });
       });
     });
@@ -541,6 +560,15 @@ describe("/api", () => {
               votes: 16,
               comment_id: 1
             });
+          });
+      });
+      it("400: returns 'Invalid input syntax' when passed bigint", () => {
+        return request(app)
+          .patch("/api/comments/1")
+          .send({ inc_votes: 587578475745758748397548975847558494 })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Invalid input syntax");
           });
       });
     });

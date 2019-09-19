@@ -1,6 +1,6 @@
 const usersRouter = require("express").Router();
 const { getUserByUsername } = require("../controllers/users-controller");
-const { invalidMethod } = require("../db/utils/utils");
+const { invalidMethod } = require("../error-handlers");
 usersRouter
   .route("/:username")
   .get(getUserByUsername)

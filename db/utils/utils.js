@@ -24,16 +24,3 @@ exports.formatComments = (comments, articleRef) => {
     return newComment;
   });
 };
-
-exports.errorIfInputNotExist = array => {
-  if (array.length === 0) {
-    return Promise.reject({
-      status: 404,
-      msg: "Input does not exist in database"
-    });
-  } else return array;
-};
-
-exports.invalidMethod = (req, res, next) => {
-  res.status(400).send({ msg: "Invalid method" });
-};

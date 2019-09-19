@@ -6,7 +6,7 @@ const {
   getArticles
 } = require("../controllers/articles-controller");
 
-const { invalidMethod } = require("../db/utils/utils");
+const { invalidMethod } = require("../error-handlers");
 
 const articlesRouter = require("express").Router();
 articlesRouter

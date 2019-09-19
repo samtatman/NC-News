@@ -1,5 +1,5 @@
 const connection = require("../db/connection");
-const { errorIfInputNotExist } = require("../db/utils/utils");
+const { errorIfInputNotExist } = require("../error-handlers.js");
 
 exports.updateComment = (comment_id, inc_votes) => {
   return connection("comments")
