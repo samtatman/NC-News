@@ -180,6 +180,19 @@ describe("/api", () => {
             expect(body.articles.length).to.equal(11);
           });
       });
+      it("200: can accept an author and a topic", () => {
+        return request(app)
+          .get("/api/articles?author=rogersop&&topic=mitch")
+          .expect(200)
+          .then(({ body }) => {
+            console.log(body);
+            expect(body.articles[0]).to.contain({
+              topic: "mitch",
+              author: "rogersop"
+            });
+            expect(body.articles.length).to.equal(2);
+          });
+      });
       it("404: if queried with author that does not exist, returns 'Input does not exist in database'", () => {
         return request(app)
           .get("/api/articles?author=does-not-exist")
@@ -199,6 +212,14 @@ describe("/api", () => {
       it("200: when passed a topic that does exist, but has no associated articles, returns empty array", () => {
         return request(app)
           .get("/api/articles?topic=paper")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).to.eql([]);
+          });
+      });
+      it("200: when passed an author that does exist, but has no associated articles, returns empty array", () => {
+        return request(app)
+          .get("/api/articles?author=lurker")
           .expect(200)
           .then(({ body }) => {
             expect(body.articles).to.eql([]);

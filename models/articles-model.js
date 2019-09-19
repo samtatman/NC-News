@@ -58,7 +58,7 @@ exports.fetchArticles = (
   author,
   topic
 ) => {
-  const fetchPromise = connection
+  return connection
     .select("articles.*")
     .count({ comment_count: "comment_id" })
     .from("articles")
@@ -70,32 +70,39 @@ exports.fetchArticles = (
         currentQuery.where({ "articles.author": author });
       }
       if (topic) {
-        currentQuery.where({ "articles.topic": topic });
+        currentQuery.where({ topic });
       }
+    })
+    .then(articles => {
+      if (!articles.length && topic) {
+        return Promise.all([
+          articles,
+          checkIfThingExists(topic, "slug", "topics")
+        ]);
+      }
+      if (!articles.length && author) {
+        return Promise.all([
+          articles,
+          checkIfThingExists(author, "username", "users")
+        ]);
+      } else return [articles];
+    })
+    .then(([articles]) => {
+      return articles;
     });
 };
 
-exports.checkIfUsernameExists = username => {
-  if (username) {
-    return connection
-      .select("*")
-      .from("users")
-      .where("username")
-      .then(output => {
-        if (!output.length)
-          Promise.reject({ status: 404, err: "Username does not exist." });
-      });
-  } else return username;
-};
-exports.checkIfTopicExists = topic => {
-  if (topic) {
-    return connection
-      .select("*")
-      .from("topics")
-      .where("topic")
-      .then(output => {
-        if (!output.length)
-          Promise.reject({ status: 404, err: "Topic does not exist." });
-      });
-  } else return topic;
+const checkIfThingExists = (thing, columnName, table) => {
+  return connection
+    .select("*")
+    .from(table)
+    .where({ [columnName]: thing })
+    .then(array => {
+      if (!array.length) {
+        return Promise.reject({
+          status: 404,
+          msg: "Input does not exist in database"
+        });
+      } else return true;
+    });
 };

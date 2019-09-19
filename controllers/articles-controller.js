@@ -57,5 +57,8 @@ exports.getArticles = (req, res, next) => {
     .then(articles => {
       return res.status(200).send({ articles });
     })
-    .catch(next);
+    .catch(err => {
+      console.log("here now");
+      next(err);
+    });
 };

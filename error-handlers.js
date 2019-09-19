@@ -19,7 +19,7 @@ exports.handleSQLErrors = (err, req, res, next) => {
 };
 
 exports.handleUnhandledErrors = (err, req, res, next) => {
-  console.log(oof);
+  console.log("oof");
   return res.status(500).send({ msg: "Unhandled Error" });
 };
 
