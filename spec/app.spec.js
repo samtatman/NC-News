@@ -235,6 +235,30 @@ describe("/api", () => {
             expect(body.msg).to.equal("Column does not exist");
           });
       });
+      it("200: returns empty array when passed topic and author that doesn't exist", () => {
+        return request(app)
+          .get("/api/articles?topic=paper&author=lurker")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).to.eql([]);
+          });
+      });
+      it("404: returns 'Input does not exist in database' when passed topic that doesn't exist but author that does", () => {
+        return request(app)
+          .get("/api/articles?topic=fefwe&author=lurker")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Input does not exist in database");
+          });
+      });
+      it("404: returns 'Input does not exist in database' when passed author that doesn't exist but topic that does", () => {
+        return request(app)
+          .get("/api/articles?topic=paper&author=fhdfd")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Input does not exist in database");
+          });
+      });
     });
     describe("GET: returns single article using :article_id", () => {
       it("405: return invalid method when invalid method called", () => {
