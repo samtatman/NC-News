@@ -12,9 +12,6 @@ exports.handleSQLErrors = (err, req, res, next) => {
     "23502": "No body in patch/post request"
   };
   if (err.code) {
-    if (err.code === "42703") {
-      return res.status(404).send({ msg: ref[err.code] });
-    }
     if (err.code === "23502") res.status(400).send({ msg: ref[err.code] });
     if (err.detail) {
       return res.status(400).send({ msg: err.detail });

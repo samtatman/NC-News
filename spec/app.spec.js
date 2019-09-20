@@ -25,6 +25,14 @@ describe("/api", () => {
           expect(body.msg).to.equal("Route does not exist.");
         });
     });
+    it('405: returns "Invalid method" when passed invalid method', () => {
+      return request(app)
+        .delete("/api")
+        .expect(405)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Invalid method");
+        });
+    });
   });
 
   describe("/api/topics", () => {
@@ -227,10 +235,10 @@ describe("/api", () => {
             expect(body.articles).to.eql([]);
           });
       });
-      it("404: returns 'Column does not exist' when passed sort_by that doesn't exist", () => {
+      it("400: returns 'Column does not exist' when passed sort_by that doesn't exist", () => {
         return request(app)
           .get("/api/articles?sort_by=5r47r")
-          .expect(404)
+          .expect(400)
           .then(({ body }) => {
             expect(body.msg).to.equal("Column does not exist");
           });
@@ -269,12 +277,12 @@ describe("/api", () => {
             expect(body.msg).to.equal("Invalid method");
           });
       });
-      it("200: returns single article", () => {
+      it("200: returns single article as object", () => {
         return request(app)
           .get("/api/articles/1")
           .expect(200)
           .then(({ body }) => {
-            expect(body.article[0]).to.contain({
+            expect(body.article).to.contain({
               article_id: 1,
               title: "Living in the shadow of a great man",
               topic: "mitch",
@@ -309,17 +317,14 @@ describe("/api", () => {
           .send({ inc_votes: 5 })
           .expect(200)
           .then(({ body }) => {
-            delete body.article[0].created_at;
-            expect(body.article).to.eql([
-              {
-                article_id: 1,
-                title: "Living in the shadow of a great man",
-                topic: "mitch",
-                author: "butter_bridge",
-                body: "I find this existence challenging",
-                votes: 105
-              }
-            ]);
+            expect(body.article).to.contain({
+              article_id: 1,
+              title: "Living in the shadow of a great man",
+              topic: "mitch",
+              author: "butter_bridge",
+              body: "I find this existence challenging",
+              votes: 105
+            });
           });
       });
       it("200: decrements vote count", () => {
@@ -328,7 +333,7 @@ describe("/api", () => {
           .send({ inc_votes: -20 })
           .expect(200)
           .then(({ body }) => {
-            expect(body.article[0]).to.contain({
+            expect(body.article).to.contain({
               votes: 80
             });
           });
@@ -369,13 +374,13 @@ describe("/api", () => {
             expect(body.msg).to.equal("Invalid input syntax");
           });
       });
-      it("400: when passed misspelt inc_count, returns unchanged comment", () => {
+      it("200: when passed misspelt inc_count, returns unchanged comment", () => {
         return request(app)
           .patch("/api/articles/1")
           .send({ ind_votes: 23 })
           .expect(200)
           .then(({ body }) => {
-            expect(body.article[0]).to.contain({ votes: 100 });
+            expect(body.article).to.contain({ votes: 100 });
           });
       });
       it("400: when passed bigint, returns 'Invalid input syntax'", () => {
@@ -395,7 +400,7 @@ describe("/api", () => {
           .send({})
           .expect(200)
           .then(({ body }) => {
-            expect(body.article[0]).to.eql({
+            expect(body.article).to.eql({
               article_id: 1,
               author: "butter_bridge",
               body: "I find this existence challenging",
@@ -411,7 +416,7 @@ describe("/api", () => {
           .patch("/api/articles/1")
           .expect(200)
           .then(({ body }) => {
-            expect(body.article[0]).to.eql({
+            expect(body.article).to.eql({
               article_id: 1,
               author: "butter_bridge",
               body: "I find this existence challenging",
@@ -565,7 +570,7 @@ describe("/api", () => {
         it("400: returns 'Column does not exist' when queried with column that does not exist ", () => {
           return request(app)
             .get("/api/articles/1/comments?sort_by=fake-column")
-            .expect(404)
+            .expect(400)
             .then(({ body }) => {
               expect(body.msg).to.equal("Column does not exist");
             });

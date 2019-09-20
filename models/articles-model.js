@@ -1,5 +1,6 @@
 const connection = require("../db/connection");
 const { errorIfInputNotExist } = require("../error-handlers.js");
+const { checkIfThingExists } = require("./utils-models");
 exports.fetchArticleById = article_id => {
   return connection
     .select("articles.*")
@@ -87,20 +88,5 @@ exports.fetchArticles = (
     })
     .then(([articles]) => {
       return articles;
-    });
-};
-
-const checkIfThingExists = (thing, columnName, table) => {
-  return connection
-    .select("*")
-    .from(table)
-    .where({ [columnName]: thing })
-    .then(array => {
-      if (!array.length) {
-        return Promise.reject({
-          status: 404,
-          msg: "Input does not exist in database"
-        });
-      } else return true;
     });
 };

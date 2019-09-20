@@ -4,8 +4,7 @@ const {
   formatDates,
   makeRefObj,
   formatComments,
-  errorIfInputNotExist,
-  invalidMethod
+  errorIfInputNotExist
 } = require("../db/utils/utils");
 
 describe("formatDates", () => {
