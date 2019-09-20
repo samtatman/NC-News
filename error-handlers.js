@@ -8,12 +8,14 @@ exports.handleSQLErrors = (err, req, res, next) => {
   const ref = {
     "22P02": "Invalid input syntax",
     "42703": "Column does not exist",
-    "23503": "Value given is not present in referred tables"
+    "23503": "Value given is not present in referred tables",
+    "23502": "No body in patch/post request"
   };
   if (err.code) {
     if (err.code === "42703") {
       return res.status(404).send({ msg: ref[err.code] });
     }
+    if (err.code === "23502") res.status(400).send({ msg: ref[err.code] });
     if (err.detail) {
       return res.status(400).send({ msg: err.detail });
     }
