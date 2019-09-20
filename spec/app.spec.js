@@ -188,7 +188,6 @@ describe("/api", () => {
           .get("/api/articles?author=rogersop&&topic=mitch")
           .expect(200)
           .then(({ body }) => {
-            console.log(body);
             expect(body.articles[0]).to.contain({
               topic: "mitch",
               author: "rogersop"
@@ -228,18 +227,10 @@ describe("/api", () => {
             expect(body.articles).to.eql([]);
           });
       });
-      xit("400: ", () => {
-        return request(app)
-          .get("/api/articles?author=lurker")
-          .expect(200)
-          .then(({ body }) => {
-            expect(body.articles).to.eql([]);
-          });
-      });
-      it("400: returns 'Column does not exist' when passed sort_by that doesn't exist", () => {
+      it("404: returns 'Column does not exist' when passed sort_by that doesn't exist", () => {
         return request(app)
           .get("/api/articles?sort_by=5r47r")
-          .expect(400)
+          .expect(404)
           .then(({ body }) => {
             expect(body.msg).to.equal("Column does not exist");
           });
@@ -266,7 +257,7 @@ describe("/api", () => {
               author: "butter_bridge",
               body: "I find this existence challenging",
               votes: 100,
-              commentCount: 13
+              commentCount: "13"
             });
           });
       });
@@ -394,12 +385,12 @@ describe("/api", () => {
             });
           });
       });
-      it("400: when inserted comment has invalid keys, returns 'Column does not exist'", () => {
+      it("400: when inserted comment has keys for columns that don't exist, returns 'Column does not exist'", () => {
         return request(app)
           .post("/api/articles/1/comments")
-          .expect(400)
+          .expect(404)
           .send({
-            invalid: "test comment",
+            nonexistent: "test comment",
             key: "butter_bridge"
           })
           .then(({ body }) => {
@@ -513,7 +504,7 @@ describe("/api", () => {
       it("400: returns 'Column does not exist' when queried with column that does not exist ", () => {
         return request(app)
           .get("/api/articles/1/comments?sort_by=fake-column")
-          .expect(400)
+          .expect(404)
           .then(({ body }) => {
             expect(body.msg).to.equal("Column does not exist");
           });

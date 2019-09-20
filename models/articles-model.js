@@ -2,22 +2,13 @@ const connection = require("../db/connection");
 const { errorIfInputNotExist } = require("../error-handlers.js");
 exports.fetchArticleById = article_id => {
   return connection
-    .select("*")
+    .select("articles.*")
+    .count({ commentCount: "comment_id" })
     .from("articles")
-    .where({ article_id })
-    .then(article => errorIfInputNotExist(article))
-    .then(([article]) => {
-      const commentPromise = connection
-        .select("*")
-        .from("comments")
-        .where({ article_id: article.article_id });
-
-      return Promise.all([commentPromise, article]);
-    })
-    .then(([commentPromise, article]) => {
-      article.commentCount = commentPromise.length;
-      return [article];
-    });
+    .leftJoin("comments", "articles.article_id", "comments.article_id")
+    .groupBy("articles.article_id")
+    .where({ "articles.article_id": article_id })
+    .then(article => errorIfInputNotExist(article));
 };
 
 exports.updateArticleById = (article_id, inc_value) => {

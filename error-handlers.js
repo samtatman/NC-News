@@ -11,6 +11,9 @@ exports.handleSQLErrors = (err, req, res, next) => {
     "23503": "Value given is not present in referred tables"
   };
   if (err.code) {
+    if (err.code === "42703") {
+      return res.status(404).send({ msg: ref[err.code] });
+    }
     if (err.detail) {
       return res.status(400).send({ msg: err.detail });
     }
@@ -19,7 +22,6 @@ exports.handleSQLErrors = (err, req, res, next) => {
 };
 
 exports.handleUnhandledErrors = (err, req, res, next) => {
-  console.log("oof");
   return res.status(500).send({ msg: "Unhandled Error" });
 };
 
@@ -33,6 +35,5 @@ exports.errorIfInputNotExist = array => {
 };
 
 exports.handleInvalidMethod = (req, res, next) => {
-  console.log("jefefw");
   res.status(405).send({ msg: "Invalid method" });
 };

@@ -31,7 +31,6 @@ exports.patchArticleById = (req, res, next) => {
 exports.postCommentByArticleId = (req, res, next) => {
   const { article_id } = req.params;
   const comment = req.body;
-  console.log("1st step");
   insertCommentByArticleId(article_id, comment)
     .then(([comment]) => {
       return res.status(201).send({ comment });
@@ -58,7 +57,6 @@ exports.getArticles = (req, res, next) => {
       return res.status(200).send({ articles });
     })
     .catch(err => {
-      console.log("here now");
       next(err);
     });
 };
