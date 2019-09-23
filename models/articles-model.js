@@ -1,6 +1,6 @@
 const connection = require("../db/connection");
 const { errorIfInputNotExist } = require("../error-handlers.js");
-const { checkIfThingExists } = require("./utils-models");
+const { checkIfThingExists, checkIfArticleExists } = require("./utils-models");
 exports.fetchArticleById = article_id => {
   return connection
     .select("articles.*")
@@ -36,12 +36,13 @@ exports.fetchCommentsByArticleId = (
   sort_by = "created_at",
   order_by = "desc"
 ) => {
-  return connection
-    .select("*")
-    .from("comments")
-    .where({ article_id })
-    .orderBy(sort_by, order_by)
-    .then(comments => errorIfInputNotExist(comments));
+  return checkIfArticleExists(article_id).then(() => {
+    return connection
+      .select("*")
+      .from("comments")
+      .where({ article_id })
+      .orderBy(sort_by, order_by);
+  });
 };
 
 exports.fetchArticles = (
@@ -50,43 +51,24 @@ exports.fetchArticles = (
   author,
   topic
 ) => {
-  return connection
-    .select("articles.*")
-    .count({ comment_count: "comment_id" })
-    .from("articles")
-    .leftJoin("comments", "articles.article_id", "comments.article_id")
-    .groupBy("articles.article_id")
-    .orderBy(sort_by, order_by)
-    .modify(currentQuery => {
-      if (author) {
-        currentQuery.where({ "articles.author": author });
-      }
-      if (topic) {
-        currentQuery.where({ topic });
-      }
-    })
-    .then(articles => {
-      if (!articles.length && topic && author) {
-        return Promise.all([
-          articles,
-          checkIfThingExists(topic, "slug", "topics"),
-          checkIfThingExists(author, "username", "users")
-        ]);
-      }
-      if (!articles.length && topic) {
-        return Promise.all([
-          articles,
-          checkIfThingExists(topic, "slug", "topics")
-        ]);
-      }
-      if (!articles.length && author) {
-        return Promise.all([
-          articles,
-          checkIfThingExists(author, "username", "users")
-        ]);
-      } else return [articles];
-    })
-    .then(([articles]) => {
-      return articles;
-    });
+  const authorPromise = checkIfThingExists(author, "username", "users");
+  const topicPromise = checkIfThingExists(topic, "slug", "topics");
+
+  return Promise.all([authorPromise, topicPromise]).then(() => {
+    return connection
+      .select("articles.*")
+      .count({ comment_count: "comment_id" })
+      .from("articles")
+      .leftJoin("comments", "articles.article_id", "comments.article_id")
+      .groupBy("articles.article_id")
+      .orderBy(sort_by, order_by)
+      .modify(currentQuery => {
+        if (author) {
+          currentQuery.where({ "articles.author": author });
+        }
+        if (topic) {
+          currentQuery.where({ topic });
+        }
+      });
+  });
 };

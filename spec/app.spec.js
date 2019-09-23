@@ -588,127 +588,135 @@ describe("/api", () => {
             .get("/api/articles/67685/comments")
             .expect(404)
             .then(({ body }) => {
-              expect(body.msg).to.equal("Input does not exist in database");
+              expect(body.msg).to.equal("Article does not exist");
+            });
+        });
+        it("200: when article has no comments returns empty array", () => {
+          return request(app)
+            .get("/api/articles/2/comments")
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.comments).to.eql([]);
             });
         });
       });
     });
-    describe("/api/comments/:comment_id", () => {
-      it("405: return invalid method when invalid method called", () => {
+  });
+  describe("/api/comments/:comment_id", () => {
+    it("405: return invalid method when invalid method called", () => {
+      return request(app)
+        .get("/api/comments/1")
+        .expect(405)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Invalid method");
+        });
+    });
+    describe("PATCH: updates comment using comment_id", () => {
+      it("200: updates votes on comment using comment_id and inc_votes", () => {
         return request(app)
-          .get("/api/comments/1")
-          .expect(405)
+          .patch("/api/comments/1")
+          .send({ inc_votes: 10 })
+          .expect(200)
           .then(({ body }) => {
-            expect(body.msg).to.equal("Invalid method");
+            expect(body.comment[0]).to.contain({
+              votes: 26,
+              comment_id: 1
+            });
           });
       });
-      describe("PATCH: updates comment using comment_id", () => {
-        it("200: updates votes on comment using comment_id and inc_votes", () => {
-          return request(app)
-            .patch("/api/comments/1")
-            .send({ inc_votes: 10 })
-            .expect(200)
-            .then(({ body }) => {
-              expect(body.comment[0]).to.contain({
-                votes: 26,
-                comment_id: 1
-              });
-            });
-        });
-        it("400: returns invalid input syntax when passed invalid comment_id", () => {
-          return request(app)
-            .patch("/api/comments/invalid")
-            .send({ inc_votes: 10 })
-            .expect(400)
-            .then(({ body }) => {
-              expect(body.msg).to.equal("Invalid input syntax");
-            });
-        });
-        it("404: returns 'Input does not exist in database' when passed valid comment_id that does not exist", () => {
-          return request(app)
-            .patch("/api/comments/9090")
-            .send({ inc_votes: 10 })
-            .expect(404)
-            .then(({ body }) => {
-              expect(body.msg).to.equal("Input does not exist in database");
-            });
-        });
-        it("400: returns 'Invalid input syntax' when passed invalid inc_votes", () => {
-          return request(app)
-            .patch("/api/comments/2")
-            .send({ inc_votes: "thr" })
-            .expect(400)
-            .then(({ body }) => {
-              expect(body.msg).to.equal("Invalid input syntax");
-            });
-        });
-        it("200: returns unchanged comment when passed missplet inc_votess", () => {
-          return request(app)
-            .patch("/api/comments/1")
-            .send({ inc_volts: 7 })
-            .expect(200)
-            .then(({ body }) => {
-              expect(body.comment[0]).to.contain({
-                votes: 16,
-                comment_id: 1
-              });
-            });
-        });
-        it("400: returns 'Invalid input syntax' when passed bigint", () => {
-          return request(app)
-            .patch("/api/comments/1")
-            .send({ inc_votes: 587578475745758748397548975847558494 })
-            .expect(400)
-            .then(({ body }) => {
-              expect(body.msg).to.equal("Invalid input syntax");
-            });
-        });
-        it("200: when sent empty object returns unchanged object", () => {
-          return request(app)
-            .patch("/api/comments/1")
-            .send({})
-            .expect(200)
-            .then(({ body }) => {
-              expect(body.comment[0]).to.contain({
-                votes: 16,
-                comment_id: 1
-              });
-            });
-        });
-        it("200: when sent no body returns unchanged object", () => {
-          return request(app)
-            .patch("/api/comments/1")
-            .expect(200)
-            .then(({ body }) => {
-              expect(body.comment[0]).to.contain({
-                votes: 16,
-                comment_id: 1
-              });
-            });
-        });
+      it("400: returns invalid input syntax when passed invalid comment_id", () => {
+        return request(app)
+          .patch("/api/comments/invalid")
+          .send({ inc_votes: 10 })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Invalid input syntax");
+          });
       });
-      describe("DELETE: deletes comment using comment_id", () => {
-        it("204: deletes comment", () => {
-          return request(app)
-            .delete("/api/comments/1")
-            .expect(204);
-        });
-        it("404: returns 'Input does not exist' when passed valid input that does not exist", () => {
-          return request(app)
-            .delete("/api/comments/686")
-            .expect(404)
-            .then(({ body }) => {
-              expect(body.msg).to.equal("Input does not exist");
+      it("404: returns 'Input does not exist in database' when passed valid comment_id that does not exist", () => {
+        return request(app)
+          .patch("/api/comments/9090")
+          .send({ inc_votes: 10 })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Input does not exist in database");
+          });
+      });
+      it("400: returns 'Invalid input syntax' when passed invalid inc_votes", () => {
+        return request(app)
+          .patch("/api/comments/2")
+          .send({ inc_votes: "thr" })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Invalid input syntax");
+          });
+      });
+      it("200: returns unchanged comment when passed missplet inc_votess", () => {
+        return request(app)
+          .patch("/api/comments/1")
+          .send({ inc_volts: 7 })
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.comment[0]).to.contain({
+              votes: 16,
+              comment_id: 1
             });
-        });
-        it("400: returns 'Invalid input syntax' when passed invalid input", () => {
-          return request(app)
-            .delete("/api/comments/invalid")
-            .expect(400)
-            .then(({ body }) => {
-              expect(body.msg).to.equal("Invalid input syntax");
+          });
+      });
+      it("400: returns 'Invalid input syntax' when passed bigint", () => {
+        return request(app)
+          .patch("/api/comments/1")
+          .send({ inc_votes: 587578475745758748397548975847558494 })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Invalid input syntax");
+          });
+      });
+      it("200: when sent empty object returns unchanged object", () => {
+        return request(app)
+          .patch("/api/comments/1")
+          .send({})
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.comment[0]).to.contain({
+              votes: 16,
+              comment_id: 1
             });
-        });
+          });
+      });
+      it("200: when sent no body returns unchanged object", () => {
+        return request(app)
+          .patch("/api/comments/1")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.comment[0]).to.contain({
+              votes: 16,
+              comment_id: 1
+            });
+          });
+      });
+    });
+    describe("DELETE: deletes comment using comment_id", () => {
+      it("204: deletes comment", () => {
+        return request(app)
+          .delete("/api/comments/1")
+          .expect(204);
+      });
+      it("404: returns 'Input does not exist' when passed valid input that does not exist", () => {
+        return request(app)
+          .delete("/api/comments/686")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Input does not exist");
+          });
+      });
+      it("400: returns 'Invalid input syntax' when passed invalid input", () => {
+        return request(app)
+          .delete("/api/comments/invalid")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Invalid input syntax");
+          });
       });
     });
   });
