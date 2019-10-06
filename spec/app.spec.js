@@ -18,7 +18,7 @@ describe("/api", () => {
   });
 
   describe("GET", () => {
-    it('200: returns api JSON', () => {
+    xit('200: returns api JSON', () => {
       return request(app)
         .get("/api")
         .expect(200)
