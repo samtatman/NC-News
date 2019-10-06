@@ -1,16 +1,16 @@
 {
-  "GET /api": {
+  "GET 200 /api": {
     "description": "serves up a json representation of all the available endpoints of the api"
   },
-  "GET /api/topics": {
+  "GET 200 /api/topics": {
     "description": "serves an array of all topics",
     "queries": [],
     "exampleResponse": {
       "topics": [{ "slug": "football", "description": "Footie!" }]
     }
   },
-  "GET /api/articles": {
-    "description": "serves an array of all topics",
+  "GET 200 /api/articles": {
+    "description": "serves an array of all articles",
     "queries": ["author", "topic", "sort_by", "order"],
     "exampleResponse": {
       "articles": [
@@ -23,5 +23,86 @@
         }
       ]
     }
+  },
+  "GET 200 /api/articles/article_id": {
+    "description": "serves a single article with input article_id",
+    "queries": [],
+    "exampleResponse": {
+      "article": {
+        "title": "Seafood substitutions are increasing",
+        "topic": "cooking",
+        "author": "weegembump",
+        "body": "Text from the article..",
+        "created_at": 1527695953341
+      }
+    }
+  },
+  "PATCH 200 /api/articles/article_id": {
+    "description": "can increment or decrement vote count on article",
+    "queries": [],
+    "exampleRequestBody": {
+      "body": { "inc_votes": 5 }
+    },
+    "exampleResponse": {
+      "article": {
+        "title": "Seafood substitutions are increasing",
+        "topic": "cooking",
+        "author": "weegembump",
+        "body": "Text from the article..",
+        "created_at": 1527695953341
+      }
+    }
+  },
+  "POST 201 /api/articles/article_id/comments": {
+    "description": "can post comment to article using article_id",
+    "queries": [],
+    "exampleRequestBody": {
+      "body": {
+        "body": "this is an example comment",
+        "username": "username of user submitting comment"
+      }
+    },
+    "exampleResponse": {
+      "comment": {
+        "article_id": 1,
+        "comment_id": 19,
+        "body": "test comment",
+        "author": "butter_bridge",
+        "votes": 0
+      }
+    }
+  },
+  "GET 200 /api/articles/article_id/comments": {
+    "description": "gets array of comments for that article_id, sorted by creation date by default",
+    "queries": {
+      "sort_by": ["author", "topic"],
+      "order_by": ["asc", "desc (default)"]
+    },
+    "exampleResponse": {
+      "comment": {
+        "article_id": 1,
+        "comment_id": 19,
+        "body": "test comment",
+        "author": "butter_bridge",
+        "votes": 0
+      }
+    }
+  },
+  "PATCH 200 /api/comments/:comment_id": {
+    "description": "can increase vote count on comment",
+    "queries": [],
+    "exampleRequestBody": { "inc_votes": 2 },
+    "exampleResponse": {
+      "comment": {
+        "article_id": 1,
+        "comment_id": 19,
+        "body": "test comment",
+        "author": "butter_bridge",
+        "votes": 2
+      }
+    }
+  },
+  "DELETE 204 /api/comments/:comment_id": {
+    "description": "can delete comment on specified article"
   }
 }

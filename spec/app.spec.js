@@ -8,6 +8,7 @@ const app = require("../app");
 const connection = require("../db/connection");
 chai.use(chaiSorted);
 
+
 describe("/api", () => {
   beforeEach(() => {
     return connection.seed.run();
@@ -17,6 +18,14 @@ describe("/api", () => {
   });
 
   describe("GET", () => {
+    it('200: returns api JSON', () => {
+      return request(app)
+        .get("/api")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Route does not exist.");
+        });
+    });
     it('404: returns "Route does not exist." when passed invalid path', () => {
       return request(app)
         .get("/route-does-not-exist")
