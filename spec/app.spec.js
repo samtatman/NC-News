@@ -7,6 +7,7 @@ const request = require("supertest");
 const app = require("../app");
 const connection = require("../db/connection");
 chai.use(chaiSorted);
+const endpoints = require("../endpoints.json");
 
 describe("/api", () => {
   beforeEach(() => {
@@ -17,12 +18,12 @@ describe("/api", () => {
   });
 
   describe("GET", () => {
-    xit("200: returns api JSON", () => {
+    it("200: returns api JSON", () => {
       return request(app)
         .get("/api")
         .expect(200)
         .then(({ body }) => {
-          expect(body.msg).to.equal("Route does not exist.");
+          expect(body.endpoints).to.eql(endpoints);
         });
     });
     it('404: returns "Route does not exist." when passed invalid path', () => {
