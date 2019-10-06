@@ -40,9 +40,9 @@ exports.postCommentByArticleId = (req, res, next) => {
 
 exports.getCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
-  let { sort_by, order_by } = req.query;
+  let { sort_by, order_by, limit, p } = req.query;
   if (order_by !== "asc" && order_by !== "desc") order_by = "desc";
-  fetchCommentsByArticleId(article_id, sort_by, order_by)
+  fetchCommentsByArticleId(article_id, sort_by, order_by, limit, p)
     .then(comments => {
       return res.status(200).send({ comments });
     })
@@ -50,9 +50,9 @@ exports.getCommentsByArticleId = (req, res, next) => {
 };
 
 exports.getArticles = (req, res, next) => {
-  let { sort_by, order_by, author, topic } = req.query;
+  let { sort_by, order_by, author, topic, limit, p } = req.query;
   if (order_by !== "asc" && order_by !== "desc") order_by = "desc";
-  fetchArticles(sort_by, order_by, author, topic)
+  fetchArticles(sort_by, order_by, author, topic, limit, p)
     .then(articles => {
       return res.status(200).send({ articles });
     })

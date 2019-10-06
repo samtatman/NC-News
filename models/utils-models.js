@@ -9,7 +9,7 @@ exports.checkIfThingExists = (thing, columnName, table) => {
         if (!array.length) {
           return Promise.reject({
             status: 404,
-            msg: "Input does not exist in database"
+            msg: `${columnName} does not exist in database`
           });
         } else return true;
       });

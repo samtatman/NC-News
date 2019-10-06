@@ -24,11 +24,11 @@ exports.handleUnhandledErrors = (err, req, res, next) => {
   return res.status(500).send({ msg: "Unhandled Error" });
 };
 
-exports.errorIfInputNotExist = array => {
+exports.errorIfInputNotExist = (array, input = "Input") => {
   if (array.length === 0) {
     return Promise.reject({
       status: 404,
-      msg: "Input does not exist in database"
+      msg: `${input} does not exist in database`
     });
   } else return array;
 };

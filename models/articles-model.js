@@ -9,7 +9,7 @@ exports.fetchArticleById = article_id => {
     .leftJoin("comments", "articles.article_id", "comments.article_id")
     .groupBy("articles.article_id")
     .where({ "articles.article_id": article_id })
-    .then(article => errorIfInputNotExist(article));
+    .then(article => errorIfInputNotExist(article, "article_id"));
 };
 
 exports.updateArticleById = (article_id, inc_value) => {
@@ -18,7 +18,7 @@ exports.updateArticleById = (article_id, inc_value) => {
     .from("articles")
     .where({ article_id })
     .returning("*")
-    .then(article => errorIfInputNotExist(article));
+    .then(article => errorIfInputNotExist(article, "article_id"));
 };
 
 exports.insertCommentByArticleId = (article_id, comment) => {
@@ -34,14 +34,18 @@ exports.insertCommentByArticleId = (article_id, comment) => {
 exports.fetchCommentsByArticleId = (
   article_id,
   sort_by = "created_at",
-  order_by = "desc"
+  order_by = "desc",
+  limit = 20,
+  p = 1
 ) => {
   return checkIfArticleExists(article_id).then(() => {
     return connection
       .select("*")
       .from("comments")
       .where({ article_id })
-      .orderBy(sort_by, order_by);
+      .orderBy(sort_by, order_by)
+      .limit(limit)
+      .offset(limit * (p - 1));
   });
 };
 
@@ -49,7 +53,9 @@ exports.fetchArticles = (
   sort_by = "created_at",
   order_by = "desc",
   author,
-  topic
+  topic,
+  limit = 20,
+  p = 1
 ) => {
   const authorPromise = checkIfThingExists(author, "username", "users");
   const topicPromise = checkIfThingExists(topic, "slug", "topics");
@@ -62,6 +68,8 @@ exports.fetchArticles = (
       .leftJoin("comments", "articles.article_id", "comments.article_id")
       .groupBy("articles.article_id")
       .orderBy(sort_by, order_by)
+      .limit(limit)
+      .offset(limit * (p - 1))
       .modify(currentQuery => {
         if (author) {
           currentQuery.where({ "articles.author": author });

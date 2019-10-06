@@ -17,7 +17,11 @@ exports.deleteComment = (req, res, next) => {
   removeComment(comment_id)
     .then(deleteCount => {
       if (deleteCount) return res.sendStatus(204);
-      else return Promise.reject({ status: 404, msg: "Input does not exist" });
+      else
+        return Promise.reject({
+          status: 404,
+          msg: "comment_id does not exist"
+        });
     })
     .catch(next);
 };

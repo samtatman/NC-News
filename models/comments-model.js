@@ -6,7 +6,7 @@ exports.updateComment = (comment_id, inc_votes) => {
     .where({ comment_id })
     .increment("votes", inc_votes)
     .returning("*")
-    .then(comment => errorIfInputNotExist(comment));
+    .then(comment => errorIfInputNotExist(comment, "comment_id"));
 };
 
 exports.removeComment = comment_id => {
