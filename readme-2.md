@@ -4,7 +4,34 @@ Agent-News is an api which is used in Agent-News, a REACT-based web app. This ap
 
 # Getting Started
 
-The api is hosted on https://git.heroku.com/agent-news.git
+Seeding the database is done in the seed.js file. It can be run with the following commands:
+
+The api is hosted on https://git.heroku.com/agent-news.git.
+
+```bash
+npm run seed
+```
+
+for seeding the dev database
+
+```bash
+npm run seed-test
+```
+
+for seeding the test database
+
+```bash
+npm run seed:prod
+```
+
+for seeding the production database.
+
+Migration rollback and latest are integrated within the seed file (the seed file rolls back to the previous migration and then rolls forward the latest one, in order to reset the database) but these migrations can also be done manually with the commands:
+
+```bash
+npm run migrate:latest
+npm run migrate:rollback
+```
 
 # Testing
 
