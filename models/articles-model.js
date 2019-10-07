@@ -1,6 +1,11 @@
 const connection = require("../db/connection");
 const { errorIfInputNotExist } = require("../error-handlers.js");
-const { checkIfThingExists, checkIfArticleExists } = require("./utils-models");
+const {
+  checkIfThingExists,
+  checkIfArticleExists,
+  paginateResults
+} = require("./utils-models");
+
 exports.fetchArticleById = article_id => {
   return connection
     .select("articles.*")
@@ -38,15 +43,15 @@ exports.fetchCommentsByArticleId = (
   limit = 20,
   p = 1
 ) => {
-  return checkIfArticleExists(article_id).then(() => {
-    return connection
-      .select("*")
-      .from("comments")
-      .where({ article_id })
-      .orderBy(sort_by, order_by)
-      .limit(limit)
-      .offset(limit * (p - 1));
-  });
+  return checkIfArticleExists(article_id)
+    .then(() => {
+      return connection
+        .select("*")
+        .from("comments")
+        .where({ article_id })
+        .orderBy(sort_by, order_by);
+    })
+    .then(comments => paginateResults(comments, limit, p));
 };
 
 exports.fetchArticles = (
@@ -60,23 +65,23 @@ exports.fetchArticles = (
   const authorPromise = checkIfThingExists(author, "username", "users");
   const topicPromise = checkIfThingExists(topic, "slug", "topics");
 
-  return Promise.all([authorPromise, topicPromise]).then(() => {
-    return connection
-      .select("articles.*")
-      .count({ comment_count: "comment_id" })
-      .from("articles")
-      .leftJoin("comments", "articles.article_id", "comments.article_id")
-      .groupBy("articles.article_id")
-      .orderBy(sort_by, order_by)
-      .limit(limit)
-      .offset(limit * (p - 1))
-      .modify(currentQuery => {
-        if (author) {
-          currentQuery.where({ "articles.author": author });
-        }
-        if (topic) {
-          currentQuery.where({ topic });
-        }
-      });
-  });
+  return Promise.all([authorPromise, topicPromise])
+    .then(() => {
+      return connection
+        .select("articles.*")
+        .count({ comment_count: "comment_id" })
+        .from("articles")
+        .leftJoin("comments", "articles.article_id", "comments.article_id")
+        .groupBy("articles.article_id")
+        .orderBy(sort_by, order_by)
+        .modify(currentQuery => {
+          if (author) {
+            currentQuery.where({ "articles.author": author });
+          }
+          if (topic) {
+            currentQuery.where({ topic });
+          }
+        });
+    })
+    .then(articles => paginateResults(articles, limit, p));
 };

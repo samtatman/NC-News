@@ -276,7 +276,7 @@ describe("/api", () => {
             expect(body.articles.length).to.equal(2);
           });
       });
-      it("200: returns default limit of pages when passed limit in invalid syntax", () => {
+      it("200: returns default limit of pages when passed invalid limit", () => {
         return request(app)
           .get("/api/articles?limit=dsads")
           .expect(200)
@@ -290,6 +290,24 @@ describe("/api", () => {
           .expect(200)
           .then(({ body }) => {
             expect(body.articles.length).to.equal(0);
+          });
+      });
+      it("200: returns a total count of articles", () => {
+        return request(app)
+          .get("/api/articles?limit=10")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles.length).to.equal(10);
+            expect(body.total_count).to.equal(12);
+          });
+      });
+      it("200: filters apply to total_count", () => {
+        return request(app)
+          .get("/api/articles?limit=3&author=icellusedkars")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles.length).to.equal(3);
+            expect(body.total_count).to.equal(6);
           });
       });
       it("404: returns 'slug does not exist in database' when passed topic that doesn't exist but author that does", () => {
@@ -671,6 +689,15 @@ describe("/api", () => {
           .expect(200)
           .then(({ body }) => {
             expect(body.comments.length).to.equal(10);
+          });
+      });
+      it("200: returns a total count of all articles ", () => {
+        return request(app)
+          .get("/api/articles/1/comments?limit=10")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.comments.length).to.equal(10);
+            expect(body.total_count).to.equal(13);
           });
       });
     });

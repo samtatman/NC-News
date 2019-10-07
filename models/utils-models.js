@@ -30,3 +30,17 @@ exports.checkIfArticleExists = article_id => {
       } else return null;
     });
 };
+
+exports.paginateResults = (results, limit, p) => {
+  const total_count = results.length;
+  if (/[^\d]/.test(limit)) limit = 20;
+  if (/[^\d]/.test(p)) p = 1;
+  const offset = limit * (p - 1);
+  const limitedResults = [];
+  for (i = offset; i <= offset + limit - 1; i++) {
+    if (results[i]) {
+      limitedResults.push(results[i]);
+    }
+  }
+  return [limitedResults, total_count];
+};
