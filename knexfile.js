@@ -23,9 +23,7 @@ const customConfig = {
     }
   },
   production: {
-    connection: {
-      database: `${DB_URL}?ssl=true`
-    }
+    connection: `${DB_URL}?ssl=true`
   }
 };
 console.log(ENV);
