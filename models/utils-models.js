@@ -35,9 +35,9 @@ exports.paginateResults = (results, limit, p) => {
   const total_count = results.length;
   if (/[^\d]/.test(limit)) limit = 20;
   if (/[^\d]/.test(p)) p = 1;
-  const offset = limit * (p - 1);
+  const newLimit = limit * p;
   const limitedResults = [];
-  for (i = offset; i <= offset + limit - 1; i++) {
+  for (i = 0; i <= newLimit - 1; i++) {
     if (results[i]) {
       limitedResults.push(results[i]);
     }

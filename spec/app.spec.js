@@ -268,12 +268,12 @@ describe("/api", () => {
             expect(body.articles.length).to.equal(10);
           });
       });
-      it("200: articles are paginated", () => {
+      it("200: another page of articles can be added to the current articles", () => {
         return request(app)
           .get("/api/articles?limit=10&p=2")
           .expect(200)
           .then(({ body }) => {
-            expect(body.articles.length).to.equal(2);
+            expect(body.articles.length).to.equal(12);
           });
       });
       it("200: returns default limit of pages when passed invalid limit", () => {
@@ -284,12 +284,12 @@ describe("/api", () => {
             expect(body.articles.length).to.equal(12);
           });
       });
-      it("200: returns no articles when page requested that has no articles", () => {
+      it("200: returns all articles when single page would have no articles", () => {
         return request(app)
           .get("/api/articles?p=2")
           .expect(200)
           .then(({ body }) => {
-            expect(body.articles.length).to.equal(0);
+            expect(body.articles.length).to.equal(12);
           });
       });
       it("200: returns a total count of articles", () => {
@@ -667,12 +667,12 @@ describe("/api", () => {
             expect(body.comments.length).to.equal(10);
           });
       });
-      it("200: comments page can be selected ", () => {
+      it("200: when given page number returns limit * p comments", () => {
         return request(app)
           .get("/api/articles/1/comments?limit=10&p=2")
           .expect(200)
           .then(({ body }) => {
-            expect(body.comments.length).to.equal(3);
+            expect(body.comments.length).to.equal(13);
           });
       });
       it("200: when passed invalid limit, defaults to 20 ", () => {
