@@ -11,7 +11,12 @@
   },
   "GET 200 /api/articles": {
     "description": "serves an array of all articles",
-    "queries": ["author", "topic", "sort_by", "order"],
+    "queries": {
+      "sort_by": ["author", "topic"],
+      "order_by": ["asc", "desc (default)"],
+      "limit": "number of results per page",
+      "p": "page number"
+    },
     "exampleResponse": {
       "articles": [
         {
@@ -26,7 +31,6 @@
   },
   "GET 200 /api/articles/article_id": {
     "description": "serves a single article with input article_id",
-    "queries": [],
     "exampleResponse": {
       "article": {
         "title": "Seafood substitutions are increasing",
@@ -55,7 +59,6 @@
   },
   "POST 201 /api/articles/article_id/comments": {
     "description": "can post comment to article using article_id",
-    "queries": [],
     "exampleRequestBody": {
       "body": {
         "body": "this is an example comment",
@@ -76,7 +79,9 @@
     "description": "gets array of comments for that article_id, sorted by creation date by default",
     "queries": {
       "sort_by": ["author", "topic"],
-      "order_by": ["asc", "desc (default)"]
+      "order_by": ["asc", "desc (default)"],
+      "limit": "number of results per page",
+      "p": "page number"
     },
     "exampleResponse": {
       "comment": {
@@ -90,7 +95,6 @@
   },
   "PATCH 200 /api/comments/:comment_id": {
     "description": "can increase vote count on comment",
-    "queries": [],
     "exampleRequestBody": { "inc_votes": 2 },
     "exampleResponse": {
       "comment": {
