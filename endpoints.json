@@ -4,9 +4,15 @@
   },
   "GET 200 /api/topics": {
     "description": "serves an array of all topics",
-    "queries": [],
     "exampleResponse": {
       "topics": [{ "slug": "football", "description": "Footie!" }]
+    }
+  },
+
+  "GET 200 /api/users/:username": {
+    "description": "serves a user with the given username",
+    "exampleResponse": {
+      "user": { "slug": "football", "description": "Footie!" }
     }
   },
   "GET 200 /api/articles": {
@@ -29,7 +35,7 @@
       ]
     }
   },
-  "GET 200 /api/articles/article_id": {
+  "GET 200 /api/articles/:article_id": {
     "description": "serves a single article with input article_id",
     "exampleResponse": {
       "article": {
@@ -41,7 +47,7 @@
       }
     }
   },
-  "PATCH 200 /api/articles/article_id": {
+  "PATCH 200 /api/articles/:article_id": {
     "description": "can increment or decrement vote count on article",
     "queries": [],
     "exampleRequestBody": {
@@ -57,7 +63,7 @@
       }
     }
   },
-  "POST 201 /api/articles/article_id/comments": {
+  "POST 201 /api/articles/:article_id/comments": {
     "description": "can post comment to article using article_id",
     "exampleRequestBody": {
       "body": {
@@ -75,7 +81,7 @@
       }
     }
   },
-  "GET 200 /api/articles/article_id/comments": {
+  "GET 200 /api/articles/:article_id/comments": {
     "description": "gets array of comments for that article_id, sorted by creation date by default",
     "queries": {
       "sort_by": ["author", "topic"],

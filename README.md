@@ -6,7 +6,9 @@ Agent-News is an api which is used in Agent-News, a REACT-based web app. This ap
 
 The API is hosted on Heroku at this address: https://agent-news.herokuapp.com/api.
 
-The link will take you to a JSON listing all of the endpoints, their example requests, queries and responses.
+The link will take you to a JSON listing all of the endpoints, their example requests, queries and responses. From there, adding the listed endpoint paths to the URL will let you access the specific resources.
+
+e.g. https://agent-news.herokuapp.com/api/topics will give you a JSON object of all of the topics in the database.
 
 # Getting Started
 
