@@ -3,9 +3,9 @@ const { expect } = require("chai");
 const {
   formatDates,
   makeRefObj,
-  formatComments,
-  errorIfInputNotExist
+  formatComments
 } = require("../db/utils/utils");
+const { paginateResults } = require("../models/utils-models");
 
 describe("formatDates", () => {
   let sample;
@@ -241,16 +241,23 @@ describe("formatComments", () => {
   });
 });
 
-describe("errorIfInputNotExist", () => {
-  it('returns rejected promise when passed array of length 0 with object containg status 404 and msg: "id does not exist"', () => {
-    return errorIfInputNotExist([]).catch(output => {
-      expect(output).to.eql({
-        status: 404,
-        msg: "Input does not exist in database"
-      });
-    });
+describe("paginateResults", () => {
+  let testArray;
+  beforeEach(() => {
+    testArray = [...Array(30).fill("sample")];
   });
-  it("returns array when passed array of length 1 or more", () => {
-    expect(errorIfInputNotExist([1, 2, 3])).to.eql([1, 2, 3]);
+  it("returns an empty array when passed an empty array", () => {
+    expect(paginateResults([], 10, 1)[0]).to.have.length(0);
+    expect(paginateResults([], 10, 1)[1]).to.equal(0);
+  });
+  it("returns array of array of length 10 and total count when passed limit of 10 and p of 1", () => {
+    expect(paginateResults(testArray, 10, 1)[0]).to.have.length(10);
+    expect(paginateResults(testArray, 10, 1)[1]).to.equal(30);
+  });
+  it("limit defaults to 20 when passed invalid limit", () => {
+    expect(paginateResults(testArray, "invalid", 1)[0]).to.have.length(20);
+  });
+  it("p defaults to 1 when passed invalid p", () => {
+    expect(paginateResults(testArray, 10, "invalid")[0]).to.have.length(10);
   });
 });

@@ -1,8 +1,8 @@
-## Agent-News
+# Agent-News
 
-Agent-News is an api which is used in Agent-News, a REACT-based web app. This api is linked to a postgres SQL database, which contains articles, comments, topics and users, used in NC News.
+Agent-News is an API which is used in the Agent-News App, a web app written with React JS. This API is linked to a postgres SQL database, which contains articles, comments, topics and users, used in NC News.
 
-# Accessing the API
+## Accessing the API
 
 The API is hosted on Heroku at this address: https://agent-news.herokuapp.com/api.
 
@@ -10,14 +10,18 @@ The link will take you to a JSON listing all of the endpoints, their example req
 
 e.g. https://agent-news.herokuapp.com/api/topics will give you a JSON object of all of the topics in the database.
 
-# Getting Started
+## Running the Program Locally
 
-To run this project locally, clone the files.
-
-Install npm and the following packages: _express_, _pg_ and _knex_ by running the commands:
+To run this project locally, clone it into a directory on your computer using the command:
 
 ```bash
-npm i express pg knex
+git clone https://github.com/samtatman/NC-News
+```
+
+Open the repository in a code editor, such as _VS Code_ and install the necessary _Node_ packages by running the command:
+
+```bash
+npm install
 ```
 
 A test and dev database will need to be created which can be done by running the following command in the terminal:

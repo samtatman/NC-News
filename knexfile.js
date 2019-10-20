@@ -26,6 +26,5 @@ const customConfig = {
     connection: `${DB_URL}?ssl=true`
   }
 };
-console.log(ENV);
 
 module.exports = { ...customConfig[ENV], ...baseConfig };
