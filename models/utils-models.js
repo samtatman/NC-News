@@ -32,7 +32,6 @@ exports.checkIfArticleExists = article_id => {
 };
 
 exports.paginateResults = (results, limit, p) => {
-  const total_count = results.length;
   if (/[^\d]/.test(limit)) limit = 20;
   if (/[^\d]/.test(p)) p = 1;
   const newLimit = limit * p;
@@ -42,5 +41,5 @@ exports.paginateResults = (results, limit, p) => {
       limitedResults.push(results[i]);
     }
   }
-  return [limitedResults, total_count];
+  return limitedResults;
 };

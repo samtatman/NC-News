@@ -92,14 +92,12 @@ describe("/api", () => {
           .get("/api/users/icellusedkars")
           .expect(200)
           .then(({ body }) => {
-            expect(body.user).to.eql([
-              {
-                username: "icellusedkars",
-                name: "sam",
-                avatar_url:
-                  "https://avatars2.githubusercontent.com/u/24604688?s=460&v=4"
-              }
-            ]);
+            expect(body.user).to.eql({
+              username: "icellusedkars",
+              name: "sam",
+              avatar_url:
+                "https://avatars2.githubusercontent.com/u/24604688?s=460&v=4"
+            });
           });
       });
       it("404: returns 'Username does not exist.' when username is not found", () => {
@@ -290,24 +288,6 @@ describe("/api", () => {
           .expect(200)
           .then(({ body }) => {
             expect(body.articles.length).to.equal(12);
-          });
-      });
-      it("200: returns a total count of articles", () => {
-        return request(app)
-          .get("/api/articles?limit=10")
-          .expect(200)
-          .then(({ body }) => {
-            expect(body.articles.length).to.equal(10);
-            expect(body.total_count).to.equal(12);
-          });
-      });
-      it("200: filters apply to total_count", () => {
-        return request(app)
-          .get("/api/articles?limit=3&author=icellusedkars")
-          .expect(200)
-          .then(({ body }) => {
-            expect(body.articles.length).to.equal(3);
-            expect(body.total_count).to.equal(6);
           });
       });
       it("404: returns 'slug does not exist in database' when passed topic that doesn't exist but author that does", () => {
@@ -506,27 +486,36 @@ describe("/api", () => {
             });
           });
       });
-      it("400: when sent empty object, returns 'No body in patch/post request'", () => {
+      it("400: when sent empty object, returns 'Missing key in patch/post request'", () => {
         return request(app)
           .post("/api/articles/1/comments")
           .expect(400)
           .send({})
           .then(({ body }) => {
-            expect(body.msg).to.equal("No body in patch/post request");
+            expect(body.msg).to.equal("Missing key in patch/post request");
           });
       });
-      it("400: when passed no body returns 'No body in patch/post request'", () => {
+      it("400: when passed no body returns 'Missing key in patch/post request'", () => {
         return request(app)
           .post("/api/articles/1/comments")
           .expect(400)
           .then(({ body }) => {
-            expect(body.msg).to.equal("No body in patch/post request");
+            expect(body.msg).to.equal("Missing key in patch/post request");
           });
       });
-      it("400: when inserted comment has invalid values, returns custom error message", () => {
+      it("400: when body does not include all required keys, returns error", () => {
         return request(app)
           .post("/api/articles/1/comments")
+          .send({ body: "no user" })
           .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Missing key in patch/post request");
+          });
+      });
+      it("404: when inserted comment has invalid values, returns custom error message", () => {
+        return request(app)
+          .post("/api/articles/1/comments")
+          .expect(404)
           .send({
             body: 56,
             username: 897
@@ -540,7 +529,7 @@ describe("/api", () => {
       it("404: returns custom error when passed valid input that does not exist", () => {
         return request(app)
           .post("/api/articles/898/comments")
-          .expect(400)
+          .expect(404)
           .send({
             body: "hello",
             username: "butter_bridge"
@@ -689,15 +678,6 @@ describe("/api", () => {
           .expect(200)
           .then(({ body }) => {
             expect(body.comments.length).to.equal(10);
-          });
-      });
-      it("200: returns a total count of all articles ", () => {
-        return request(app)
-          .get("/api/articles/1/comments?limit=10")
-          .expect(200)
-          .then(({ body }) => {
-            expect(body.comments.length).to.equal(10);
-            expect(body.total_count).to.equal(13);
           });
       });
     });
